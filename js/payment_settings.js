@@ -91,7 +91,7 @@ $(function(){
 
 			$(".check_option").css("display","block").show();
 			$("#ps_currency_check_div").show();
-		}
+		}else if(merchant_type == 'Unite_pay'){			$("#ps_unitepay_options").show();			$(".check_option").css("display","block").show();			$("#ps_currency_check_div").show();		}
 
 		//only display 'trial period' when 'enable recurring payments' being checked
 		//recurring payment is not available for Braintree and Check
@@ -224,7 +224,7 @@ $(function(){
 	$('#ps_paypal_rest_live_clientid').bind('keyup mouseout change', function() {
 		$("#ps_main_list").data('payment_properties').paypal_rest_live_clientid = $(this).val();
 	});
-
+	$('#jylsh').bind('keyup mouseout change', function() {		$("#ps_main_list").data('payment_properties').paypal_rest_live_clientid = $(this).val();	});	$('#sign').bind('keyup mouseout change', function() {		$("#ps_main_list").data('payment_properties').paypal_rest_live_secret_key = $(this).val();	});
 	//attach event to PayPal Pro 'live Secret Key' textbox
 	$('#ps_paypal_rest_live_secret_key').bind('keyup mouseout change', function() {
 		$("#ps_main_list").data('payment_properties').paypal_rest_live_secret_key = $(this).val();
