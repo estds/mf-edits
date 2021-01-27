@@ -574,12 +574,61 @@ EOT;
 									<span class="icon-question helpicon" data-tippy-content="A merchant will process transactions on your form and authorize the payments."></span>
 									<select class="select" id="ps_select_merchant" style="width: 60%" autocomplete="off">
 										<option <?php if($payment_properties->merchant_type == 'paypal_standard'){ echo 'selected="selected"'; } ?> value="paypal_standard">PayPal Standard</option>
+										<option <?php if($payment_properties->merchant_type == 'Unite_pay'){ echo 'selected="selected"'; } ?> value="Unite_pay">Unite_pay</option>
 										<option <?php if($payment_properties->merchant_type == 'stripe'){ echo 'selected="selected"'; } ?> value="stripe">Stripe</option>
 										<option <?php if($payment_properties->merchant_type == 'authorizenet'){ echo 'selected="selected"'; } ?> value="authorizenet">Authorize.net</option>
 										<option <?php if($payment_properties->merchant_type == 'braintree'){ echo 'selected="selected"'; } ?> value="braintree">Braintree</option>
 										<option <?php if($payment_properties->merchant_type == 'check'){ echo 'selected="selected"'; } ?> value="check">Check / Cash</option>
 										<option <?php if($payment_properties->merchant_type == 'paypal_rest'){ echo 'selected="selected"'; } ?> value="paypal_rest">PayPal Pro - REST API (DEPRECATED)</option>
 									</select>
+									
+									
+										<div id="ps_unitepay_options" class="merchant_options" <?php if($payment_properties->merchant_type != 'Unite_pay'){ echo 'style="display: none"'; } ?>>
+										<label class="description inline" for="jylsh">xmpch <span class="required">*</span> </label>
+										<span class="icon-question helpicon" data-tippy-content="This is the jylsh associated with your Unite_pay."></span>
+										<input id="jylsh" name="jylsh" style="width: 94%" class="element text large" value="<?php echo htmlspecialchars($payment_properties->paypal_rest_live_clientid); ?>" type="text">
+										
+										<label class="description inline" for="sign">sign <span class="required">*</span> </label>
+										<span class="icon-question helpicon" data-tippy-content="This is the sign associated with your Unite_pay."></span>
+										<input id="sign" name="sign" style="width: 94%" class="element text large" value="<?php echo htmlspecialchars($payment_properties->paypal_rest_live_secret_key); ?>" type="text">
+					
+										<label class="description inline" for="ps_paypal_language">Language </label>
+										<span class="icon-question helpicon" data-tippy-content="Select the language to be displayed on PayPal pages."></span>
+										<select id="ps_paypal_language" name="ps_paypal_language" class="select large" style="width: 95%">
+											<option value="US" <?php if($payment_properties->paypal_language == 'US'){ echo 'selected="selected"'; } ?>>English (American)</option>
+											<option value="GB" <?php if($payment_properties->paypal_language == 'GB'){ echo 'selected="selected"'; } ?>>English (Great Britain)</option>
+											<option value="AU" <?php if($payment_properties->paypal_language == 'AU'){ echo 'selected="selected"'; } ?>>English (Australian)</option>
+											<option value="BG" <?php if($payment_properties->paypal_language == 'BG'){ echo 'selected="selected"'; } ?>>Bulgarian</option>
+											<option value="CN" <?php if($payment_properties->paypal_language == 'CN'){ echo 'selected="selected"'; } ?>>Chinese</option>
+											<option value="DK" <?php if($payment_properties->paypal_language == 'DK'){ echo 'selected="selected"'; } ?>>Danish</option>
+											<option value="NL" <?php if($payment_properties->paypal_language == 'NL'){ echo 'selected="selected"'; } ?>>Dutch</option>
+											<option value="EE" <?php if($payment_properties->paypal_language == 'EE'){ echo 'selected="selected"'; } ?>>Estonian</option>
+											<option value="FI" <?php if($payment_properties->paypal_language == 'FI'){ echo 'selected="selected"'; } ?>>Finnish</option>
+											<option value="FR" <?php if($payment_properties->paypal_language == 'FR'){ echo 'selected="selected"'; } ?>>French</option>
+											<option value="fr_CA" <?php if($payment_properties->paypal_language == 'fr_CA'){ echo 'selected="selected"'; } ?>>French (Canada)</option>
+											<option value="DE" <?php if($payment_properties->paypal_language == 'DE'){ echo 'selected="selected"'; } ?>>German</option>
+											<option value="GR" <?php if($payment_properties->paypal_language == 'GR'){ echo 'selected="selected"'; } ?>>Greek</option>
+											<option value="HU" <?php if($payment_properties->paypal_language == 'HU'){ echo 'selected="selected"'; } ?>>Hungarian</option>
+											<option value="IT" <?php if($payment_properties->paypal_language == 'IT'){ echo 'selected="selected"'; } ?>>Italian</option>
+											<option value="JP" <?php if($payment_properties->paypal_language == 'JP'){ echo 'selected="selected"'; } ?>>Japanese</option>
+											<option value="NO" <?php if($payment_properties->paypal_language == 'NO'){ echo 'selected="selected"'; } ?>>Norwegian</option>
+											<option value="PL" <?php if($payment_properties->paypal_language == 'PL'){ echo 'selected="selected"'; } ?>>Polish</option>
+											<option value="PT" <?php if($payment_properties->paypal_language == 'PT'){ echo 'selected="selected"'; } ?>>Portuguese</option>
+											<option value="RO" <?php if($payment_properties->paypal_language == 'RO'){ echo 'selected="selected"'; } ?>>Romanian</option>
+											<option value="ES" <?php if($payment_properties->paypal_language == 'ES'){ echo 'selected="selected"'; } ?>>Spanish</option>
+											<option value="SE" <?php if($payment_properties->paypal_language == 'SE'){ echo 'selected="selected"'; } ?>>Swedish</option>
+											<option value="CH" <?php if($payment_properties->paypal_language == 'CH'){ echo 'selected="selected"'; } ?>>Swiss-German</option>
+										</select>
+
+										<input id="ps_paypal_enable_test_mode" <?php if(!empty($payment_properties->paypal_enable_test_mode)){ echo 'checked="checked"'; } ?> class="checkbox" value="" type="checkbox" style="margin-left: 0px;margin-top: 15px">
+										<label class="choice" for="ps_paypal_enable_test_mode">Enable Test Mode</label>		
+										<span class="icon-question helpicon" data-tippy-content="If enabled, all transactions will go through PayPal test server (Sandbox). You can use this to test payments without using actual money. You'll need to login to https://developer.paypal.com and create your sandbox account there."></span>
+									</div>
+									
+									
+									
+									
+									
 									<div id="ps_paypal_options" class="merchant_options" <?php if($payment_properties->merchant_type != 'paypal_standard'){ echo 'style="display: none"'; } ?>>
 										<label class="description inline" for="ps_paypal_email">PayPal Email Address <span class="required">*</span> </label>
 										<span class="icon-question helpicon" data-tippy-content="This is the email address associated with your PayPal account."></span>
@@ -617,6 +666,9 @@ EOT;
 										<label class="choice" for="ps_paypal_enable_test_mode">Enable Test Mode</label>		
 										<span class="icon-question helpicon" data-tippy-content="If enabled, all transactions will go through PayPal test server (Sandbox). You can use this to test payments without using actual money. You'll need to login to https://developer.paypal.com and create your sandbox account there."></span>
 									</div>
+									
+									
+									
 									<div id="ps_authorizenet_options" class="merchant_options" <?php if($payment_properties->merchant_type != 'authorizenet'){ echo 'style="display: none"'; } ?>>
 										<div id="ps_authorizenet_live_keys" <?php if(!empty($payment_properties->authorizenet_enable_test_mode)){ echo 'style="display: none;"'; } ?>>
 											<label class="description inline" for="ps_authorizenet_live_apiloginid">API Login ID <span class="required">*</span> </label>
