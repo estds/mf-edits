@@ -27,6 +27,9 @@
 	}
 	
 	$payment_properties = mf_sanitize($_POST['payment_properties']);
+	
+	//var_dump($payment_properties);
+	
 	$field_prices = mf_sanitize($_POST['field_prices']);
 	
 	$form_id = (int) $payment_properties['form_id'];
@@ -62,6 +65,9 @@
 	if(!empty($form_input['payment_discount_max_usage'])){
 		$form_input['payment_discount_max_usage'] = (int) abs($form_input['payment_discount_max_usage']);
 	}
+	
+	
+	//var_dump($form_input);
 
 	mf_ap_forms_update($form_id,$form_input,$dbh);
 	
@@ -93,7 +99,7 @@
 	}
    
 	$_SESSION['MF_SUCCESS'] = 'Payment settings has been saved.';
-	
+	//die;
    	echo '{ "status" : "ok", "form_id" : "'.$form_id.'" }';
    
 ?>
