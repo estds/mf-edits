@@ -284,6 +284,10 @@
 		
 		$sth = mf_do_query($query,$params,$dbh);
 		$row = mf_do_fetch_result($sth);
+		
+		//var_dump($row);
+		
+		
 
 		$payment_id 		= $row['payment_id'];
 		$payment_date 		= $row['payment_date'];
