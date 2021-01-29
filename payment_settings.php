@@ -253,6 +253,10 @@
 		case 'TWD' : $currency_symbol = 'NT&#36;';break;
 		case 'TRY' : $currency_symbol = 'TL';break;
 	}
+	if($payment_properties->merchant_type=='Unite_pay'){
+		$currency_symbol = 'CN￥';
+		
+	}
 	
 	//when certain fields (checkboxes, radio buttons, dropdown) has an option being deleted
 	//the related ap_element_prices records are not being updated
@@ -592,37 +596,9 @@ EOT;
 										<span class="icon-question helpicon" data-tippy-content="This is the sign associated with your Unite_pay."></span>
 										<input id="sign" name="sign" style="width: 94%" class="element text large" value="<?php echo htmlspecialchars($payment_properties->paypal_rest_live_secret_key); ?>" type="text">
 					
-										<label class="description inline" for="ps_paypal_language">Language </label>
-										<span class="icon-question helpicon" data-tippy-content="Select the language to be displayed on PayPal pages."></span>
-										<select id="ps_paypal_language" name="ps_paypal_language" class="select large" style="width: 95%">
-											<option value="US" <?php if($payment_properties->paypal_language == 'US'){ echo 'selected="selected"'; } ?>>English (American)</option>
-											<option value="GB" <?php if($payment_properties->paypal_language == 'GB'){ echo 'selected="selected"'; } ?>>English (Great Britain)</option>
-											<option value="AU" <?php if($payment_properties->paypal_language == 'AU'){ echo 'selected="selected"'; } ?>>English (Australian)</option>
-											<option value="BG" <?php if($payment_properties->paypal_language == 'BG'){ echo 'selected="selected"'; } ?>>Bulgarian</option>
-											<option value="CN" <?php if($payment_properties->paypal_language == 'CN'){ echo 'selected="selected"'; } ?>>Chinese</option>
-											<option value="DK" <?php if($payment_properties->paypal_language == 'DK'){ echo 'selected="selected"'; } ?>>Danish</option>
-											<option value="NL" <?php if($payment_properties->paypal_language == 'NL'){ echo 'selected="selected"'; } ?>>Dutch</option>
-											<option value="EE" <?php if($payment_properties->paypal_language == 'EE'){ echo 'selected="selected"'; } ?>>Estonian</option>
-											<option value="FI" <?php if($payment_properties->paypal_language == 'FI'){ echo 'selected="selected"'; } ?>>Finnish</option>
-											<option value="FR" <?php if($payment_properties->paypal_language == 'FR'){ echo 'selected="selected"'; } ?>>French</option>
-											<option value="fr_CA" <?php if($payment_properties->paypal_language == 'fr_CA'){ echo 'selected="selected"'; } ?>>French (Canada)</option>
-											<option value="DE" <?php if($payment_properties->paypal_language == 'DE'){ echo 'selected="selected"'; } ?>>German</option>
-											<option value="GR" <?php if($payment_properties->paypal_language == 'GR'){ echo 'selected="selected"'; } ?>>Greek</option>
-											<option value="HU" <?php if($payment_properties->paypal_language == 'HU'){ echo 'selected="selected"'; } ?>>Hungarian</option>
-											<option value="IT" <?php if($payment_properties->paypal_language == 'IT'){ echo 'selected="selected"'; } ?>>Italian</option>
-											<option value="JP" <?php if($payment_properties->paypal_language == 'JP'){ echo 'selected="selected"'; } ?>>Japanese</option>
-											<option value="NO" <?php if($payment_properties->paypal_language == 'NO'){ echo 'selected="selected"'; } ?>>Norwegian</option>
-											<option value="PL" <?php if($payment_properties->paypal_language == 'PL'){ echo 'selected="selected"'; } ?>>Polish</option>
-											<option value="PT" <?php if($payment_properties->paypal_language == 'PT'){ echo 'selected="selected"'; } ?>>Portuguese</option>
-											<option value="RO" <?php if($payment_properties->paypal_language == 'RO'){ echo 'selected="selected"'; } ?>>Romanian</option>
-											<option value="ES" <?php if($payment_properties->paypal_language == 'ES'){ echo 'selected="selected"'; } ?>>Spanish</option>
-											<option value="SE" <?php if($payment_properties->paypal_language == 'SE'){ echo 'selected="selected"'; } ?>>Swedish</option>
-											<option value="CH" <?php if($payment_properties->paypal_language == 'CH'){ echo 'selected="selected"'; } ?>>Swiss-German</option>
-										</select>
+										
 
-										<input id="ps_paypal_enable_test_mode" <?php if(!empty($payment_properties->paypal_enable_test_mode)){ echo 'checked="checked"'; } ?> class="checkbox" value="" type="checkbox" style="margin-left: 0px;margin-top: 15px">
-										<label class="choice" for="ps_paypal_enable_test_mode">Enable Test Mode</label>		
-										<span class="icon-question helpicon" data-tippy-content="If enabled, all transactions will go through PayPal test server (Sandbox). You can use this to test payments without using actual money. You'll need to login to https://developer.paypal.com and create your sandbox account there."></span>
+										
 									</div>
 									
 									
@@ -1313,7 +1289,7 @@ EOT;
 											
 											<label class="description inline" for="ps_price_amount" style="margin-top: 0px">Price Amount <span class="required">*</span></label>
 											<span class="icon-question helpicon clearfix" data-tippy-content="Enter the amount to be charged to your client."></span>
-											<span class="symbol"><?php echo $currency_symbol; ?></span><span><input id="ps_price_amount" name="ps_price_amount" class="element text medium" value="<?php echo $payment_properties->price_amount; ?>" type="text"></span>
+											<span class="symbol" symbol="<?php echo $currency_symbol; ?>"><?php echo $currency_symbol; ?></span><span><input id="ps_price_amount" name="ps_price_amount" class="element text medium" value="<?php echo $payment_properties->price_amount; ?>" type="text"></span>
 											
 											<div class="clearfix"></div>
 
