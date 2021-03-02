@@ -37,6 +37,9 @@ $(function() {
 		$("#ps_main_list").data('payment_properties').recurring_unit = 'month';
 		//show 'price name' by default
 		$("#ps_price_name_container").show();
+		var symbol = $(".symbol").attr('symbol');
+		$(".ps_td_currency").text(symbol);
+		$(".symbol").text(symbol);
 		if(merchant_type == 'paypal_standard') {
 			$("#ps_paypal_options").show();
 			$(".paypal_option").css("display", "block").show();
@@ -68,6 +71,12 @@ $(function() {
 			$("#ps_currency_braintree_div").show();
 		} else if(merchant_type == 'check') {
 			$("#ps_check_options").show();
+			$(".check_option").css("display", "block").show();
+			$("#ps_currency_check_div").show();
+		} else if(merchant_type == 'Unite_pay') {
+			$("#ps_unitepay_options").show();
+			$(".symbol").text('CN￥');
+			$(".ps_td_currency").text('CN￥');
 			$(".check_option").css("display", "block").show();
 			$("#ps_currency_check_div").show();
 		}
@@ -183,6 +192,12 @@ $(function() {
 	//attach event to PayPal Pro 'live Client ID' textbox
 	$('#ps_paypal_rest_live_clientid').bind('keyup mouseout change', function() {
 		$("#ps_main_list").data('payment_properties').paypal_rest_live_clientid = $(this).val();
+	});
+	$('#jylsh').bind('keyup mouseout change', function() {
+		$("#ps_main_list").data('payment_properties').paypal_rest_live_clientid = $(this).val();
+	});
+	$('#sign').bind('keyup mouseout change', function() {
+		$("#ps_main_list").data('payment_properties').paypal_rest_live_secret_key = $(this).val();
 	});
 	//attach event to PayPal Pro 'live Secret Key' textbox
 	$('#ps_paypal_rest_live_secret_key').bind('keyup mouseout change', function() {
