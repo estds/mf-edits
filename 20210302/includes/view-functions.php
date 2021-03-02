@@ -4918,6 +4918,7 @@ function mf_display_form($dbh, $form_id, $form_params = array())
 						 form_schedule_end_hour,
 						 logic_field_enable,
 						 logic_page_enable,
+						 payment_merchant_type
 						 payment_enable_discount,
 						 payment_discount_type,
 						 payment_discount_amount,
@@ -4939,6 +4940,7 @@ function mf_display_form($dbh, $form_id, $form_params = array())
     );
     $sth = mf_do_query($query, $params, $dbh);
     $row = mf_do_fetch_result($sth);
+    $rows = $row;
     //check for non-existent or currently drafted forms or inactive forms
     if ($row === false)
     {
@@ -6904,12 +6906,19 @@ EOT;
                 $currency_symbol = '&#36;';
             break;
         }
+        //echo $payment_merchant_type;die;
+        //var_dump($rows);//die;
+        if ($rows['payment_enable_discount'] == 'Unite_pay')
+        {
+            $currency_symbol = 'CN￥';
+        }
         if ($form->payment_price_type == 'variable')
         {
             //if this is multipage form, we need to get the total selected price from other pages
             if ($form->page_total > 1)
             {
                 $other_page_total_payment = (double)mf_get_payment_total($dbh, $form_id, $session_id, $page_number);
+                echo 'other_page_total_payment====' . $other_page_total_payment . '--session_id===' . $session_id . ',' . $page_number; //die;
                 $other_page_total_data_tag = 'data-basetotal="' . $other_page_total_payment . '"';
             }
             else
@@ -8473,6 +8482,7 @@ EOT;
             $total_payment = $payment_price_amount;
         }
         $total_payment = sprintf("%.2f", $total_payment);
+        //echo $total_payment;die;
         //display tax info if enabled
         if (!empty($payment_enable_tax) && !empty($payment_tax_rate))
         {
