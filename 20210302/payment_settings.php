@@ -283,6 +283,10 @@ switch ($payment_properties->currency)
         $currency_symbol = 'TL';
     break;
 }
+if ($payment_properties->merchant_type == 'Unite_pay')
+{
+    $currency_symbol = 'CN￥';
+}
 //when certain fields (checkboxes, radio buttons, dropdown) has an option being deleted
 //the related ap_element_prices records are not being updated
 //thus we need to do a cleanup here, before loading the prices
@@ -610,6 +614,10 @@ require ('includes/header.php');
 {
     echo 'selected="selected"';
 } ?> value="paypal_standard">PayPal Standard</option>
+										<option <?php if ($payment_properties->merchant_type == 'Unite_pay')
+{
+    echo 'selected="selected"';
+} ?> value="Unite_pay">Unite_pay</option>
 										<option <?php if ($payment_properties->merchant_type == 'stripe')
 {
     echo 'selected="selected"';
@@ -631,6 +639,17 @@ require ('includes/header.php');
     echo 'selected="selected"';
 } ?> value="paypal_rest">PayPal Pro - REST API (DEPRECATED)</option>
 									</select>
+										<div id="ps_unitepay_options" class="merchant_options" <?php if ($payment_properties->merchant_type != 'Unite_pay')
+{
+    echo 'style="display: none"';
+} ?>>
+										<label class="description inline" for="jylsh">xmpch <span class="required">*</span> </label>
+										<span class="icon-question helpicon" data-tippy-content="This is the jylsh associated with your Unite_pay."></span>
+										<input id="jylsh" name="jylsh" style="width: 94%" class="element text large" value="<?php echo htmlspecialchars($payment_properties->paypal_rest_live_clientid); ?>" type="text">
+										<label class="description inline" for="sign">sign <span class="required">*</span> </label>
+										<span class="icon-question helpicon" data-tippy-content="This is the sign associated with your Unite_pay."></span>
+										<input id="sign" name="sign" style="width: 94%" class="element text large" value="<?php echo htmlspecialchars($payment_properties->paypal_rest_live_secret_key); ?>" type="text">
+									</div>
 									<div id="ps_paypal_options" class="merchant_options" <?php if ($payment_properties->merchant_type != 'paypal_standard')
 {
     echo 'style="display: none"';
@@ -2070,7 +2089,7 @@ if (in_array($payment_properties->merchant_type, array(
 } ?>>
 											<label class="description inline" for="ps_price_amount" style="margin-top: 0px">Price Amount <span class="required">*</span></label>
 											<span class="icon-question helpicon clearfix" data-tippy-content="Enter the amount to be charged to your client."></span>
-											<span class="symbol"><?php echo $currency_symbol; ?></span><span><input id="ps_price_amount" name="ps_price_amount" class="element text medium" value="<?php echo $payment_properties->price_amount; ?>" type="text"></span>
+											<span class="symbol" symbol="<?php echo $currency_symbol; ?>"><?php echo $currency_symbol; ?></span><span><input id="ps_price_amount" name="ps_price_amount" class="element text medium" value="<?php echo $payment_properties->price_amount; ?>" type="text"></span>
 											<div class="clearfix"></div>
 											<span id="ps_price_name_container" <?php if ($payment_properties->merchant_type == 'stripe' && !empty($payment_properties->stripe_enable_receipt))
 {
