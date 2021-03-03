@@ -96,24 +96,24 @@
 		$errorno=curl_errno($ch);
 		return $tmpInfo;
 	}
-	function unite_pay($amount,$xmpch,$key,$orderNo){
+	function unite_pay($formid,$amount,$xmpch,$key,$orderNo){
 		
 		
-		$url='http://cwcwx.hhu.edu.cn/zhifu/payAccept.aspx';
+		$url='https://cwcwx.hhu.edu.cn/zhifu/payAccept.aspx';
 		
 		$data=array();
 		$data['orderDate']=date('YmdHis',time()+3600*8);
 		$data['orderNo']=$orderNo;
 		$data['amount']=$amount;
 		$data['notify_url']=$_SERVER["REQUEST_SCHEME"].'://'.$_SERVER["HTTP_HOST"].'/unitepay_notify.php';
-		$data['return_url']=$_SERVER["REQUEST_SCHEME"].'://'.$_SERVER["HTTP_HOST"].'/return_url.php';
+		$data['return_url']=$_SERVER["REQUEST_SCHEME"].'://'.$_SERVER["HTTP_HOST"].'/view.php?id='.$formid.'&done=1';
 		$data['xmpch']=$xmpch;
 		
 		$data['sign']=md5('orderDate='.$data['orderDate'].'&orderNo='.$data['orderNo'].'&amount='.$data['amount'].'&xmpch='.$data['xmpch'].'&return_url='.$data['return_url'].'&notify_url='.$data['notify_url'].$key);
 
 		$r=curlPost($url,$data);
 		$r=str_replace('http','https',$r);
-		$r=str_replace('<head>','<head><base href="http://cwcwx.hhu.edu.cn/zhifu/" />',$r);
+		$r=str_replace('<head>','<head><base href="https://cwcwx.hhu.edu.cn/zhifu/" />',$r);
 		
 		return $r;
 	}
@@ -128,6 +128,7 @@
 
 	$ssl_suffix = mf_get_ssl_suffix();
 	
+	
 
 	if(mf_is_form_submitted()){ 
 
@@ -135,24 +136,91 @@
 		
 		
 		
-		//$_SESSION['mf_entry_hash'][$form_id]
+		
 		$form_properties = mf_get_form_properties($dbh,$input_array['form_id'],array('payment_merchant_type'));
 				
-			
+		$form_id=$input_array['form_id'];	
 				
 		if($form_properties['payment_merchant_type']=='Unite_pay'){
-			$form_id=$input_array['form_id'];
+			
 			$_SESSION['mf_entry_hash'][$form_id]='';
 		}
 		
 		
+		$session_id = session_id();
+		
+								
+		
+		
+		
+		$money = (double) mf_get_payment_total($dbh,$form_id,$session_id,$input_array['page_number']);
 		
 		
 
 		$submit_result = mf_process_form($dbh,$input_array);
-
 		
+		
+		
+		$query = "select 
+						form_active,
+						form_password,
+						form_language,
+						form_review,
+						form_page_total,
+						logic_field_enable,
+						logic_page_enable,
+						payment_price_type,
+						logic_success_enable,
+						form_encryption_enable,
+						form_encryption_public_key,
+						form_entry_edit_enable,
+						form_entry_edit_resend_notifications,
+						form_entry_edit_rerun_logics,
+						form_entry_edit_auto_disable,
+						form_entry_edit_auto_disable_period,
+						form_entry_edit_auto_disable_unit   
+					from 
+						`".MF_TABLE_PREFIX."forms` where form_id=?";
+		$params = array($form_id);
+		
+		$sth = mf_do_query($query,$params,$dbh);
+		$row = mf_do_fetch_result($sth);
+		
+		
+		$form_page_total    = (int) $row['form_page_total'];
+		/*
+		echo $form_page_total;
+		var_dump($submit_result);
+		*/
+		
+		
+		
+		
+		
+		
+		if((!isset($submit_result['next_page_number']))||($submit_result['next_page_number']==($form_page_total+1))){
+			
+			if((!isset($submit_result['entry_id']))||(!$submit_result['entry_id'])){
+				if(isset($_SESSION['review_id'])&&$_SESSION['review_id']){
+					$submit_result['entry_id']=$_SESSION['review_id'];
+				}else{
+					$query = "SELECT `id` from `".MF_TABLE_PREFIX."form_{$form_id}_review` where session_id=?";
+					$params = array($session_id);
+					
+					$sth = mf_do_query($query,$params,$dbh);
+					$row = mf_do_fetch_result($sth);
+							
+					$submit_result['entry_id']= $row['id'];
+					
+					
+				}
 
+			
+			}
+		
+		}
+		
+		
 		if(!isset($input_array['password'])){ 
 
 		
@@ -165,147 +233,244 @@
 				$form_properties = mf_get_form_properties($dbh,$input_array['form_id'],array('payment_merchant_type'));
 				
 			
-				
-				if($form_properties['payment_merchant_type']=='Unite_pay'){
-					
-					
-					
-					
-						$form_propertiess = mf_get_form_properties($dbh,$input_array['form_id'],array('payment_merchant_type','payment_price_type','payment_price_amount','payment_paypal_rest_live_clientid','payment_paypal_rest_live_secret_key'));
+				if((!isset($submit_result['next_page_number']))||($submit_result['next_page_number']==($form_page_total+1))){
+					if($form_properties['payment_merchant_type']=='Unite_pay'){
 						
-						if($form_propertiess['payment_price_type']=='fixed'){
-							$money=$form_propertiess['payment_price_amount'];
+						
+						
+						
+							$form_propertiess = mf_get_form_properties($dbh,$input_array['form_id'],array('payment_merchant_type','payment_price_type','payment_price_amount','payment_paypal_rest_live_clientid','payment_paypal_rest_live_secret_key'));
 							
-						}else{
-						
-							$query = "select 
-										A.element_id,
-										A.option_id,
-										A.`price`,
-										B.`position` 
-									from 
-										".MF_TABLE_PREFIX."element_prices A left join ".MF_TABLE_PREFIX."element_options B 
-									  on 
-										(A.form_id=B.form_id and A.element_id=B.element_id and A.option_id=B.option_id) 
-								   where 
-										A.form_id = ? 
-								order by 
-												A.element_id,B.position asc";
-								$params = array($input_array['form_id']);
+							if($form_propertiess['payment_price_type']=='fixed'){
+								/*
+								var_dump($form_propertiess);die;
+								*/
+								$money=$form_propertiess['payment_price_amount'];
 								
-								$sth = mf_do_query($query,$params,$dbh);
-								$current_price_settings = array();
-								
-								while($row = mf_do_fetch_result($sth)){
-									$element_id = (int) $row['element_id'];
-									$option_id = (int) $row['option_id'];
-									$current_price_settings[$element_id][$option_id]  = $row['price'];
+							}else{
+							/*
+								$query = "select 
+											A.element_id,
+											A.option_id,
+											A.`price`,
+											B.`position` 
+										from 
+											".MF_TABLE_PREFIX."element_prices A left join ".MF_TABLE_PREFIX."element_options B 
+										  on 
+											(A.form_id=B.form_id and A.element_id=B.element_id and A.option_id=B.option_id) 
+									   where 
+											A.form_id = ? 
+									order by 
+													A.element_id,B.position asc";
+									$params = array($input_array['form_id']);
 									
-									$ky='element_'.$element_id;
-									if(isset($input_array[$ky])){
-										if($option_id==$input_array[$ky]){
-											$money=$row['price'];
+									$sth = mf_do_query($query,$params,$dbh);
+									$current_price_settings = array();
+									$money=0;
+									while($row = mf_do_fetch_result($sth)){
+										
+									var_dump($row);
+										
+										
+										
+										$element_id = (int) $row['element_id'];
+										$option_id = (int) $row['option_id'];
+										$current_price_settings[$element_id][$option_id]  = $row['price'];
+										
+										$ky='element_'.$element_id;
+										if(isset($input_array[$ky])){
+											if($option_id==$input_array[$ky]){
+												$money=$row['price'];
+												
+											}
 											
 										}
-										
+										if(!$money){
+											if(isset($row['price'])){
+												$money=$row['price'];
+											}
+							
+										}
 									}
-									
-									
-								}
+								die;
+								*/
 								
-						}
-					
-		$payment_data['payment_fullname'] = 'Unite_pay';
-		$payment_data['form_id'] 		  = $input_array['form_id'];
-		$payment_data['record_id'] 		  = $submit_result['entry_id'];
-		$payment_data['date_created']	  = date("Y-m-d H:i:s");
-		$payment_data['status']			  = 0;
-		$payment_data['payment_status']   = 'unpaid'; 
-
-		$query = "INSERT INTO `".MF_TABLE_PREFIX."form_payments`(
-								`form_id`, 
-								`record_id`, 
-								`payment_id`, 
-								`date_created`, 
-								`payment_date`, 
-								`payment_status`, 
-								`payment_fullname`, 
-								`payment_amount`, 
-								`payment_currency`, 
-								`payment_test_mode`,
-								`payment_merchant_type`, 
-								`status`, 
-								`billing_street`, 
-								`billing_city`, 
-								`billing_state`, 
-								`billing_zipcode`, 
-								`billing_country`, 
-								`same_shipping_address`, 
-								`shipping_street`, 
-								`shipping_city`, 
-								`shipping_state`, 
-								`shipping_zipcode`, 
-								`shipping_country`) 
-						VALUES (
-								:form_id, 
-								:record_id, 
-								:payment_id, 
-								:date_created, 
-								:payment_date, 
-								:payment_status, 
-								:payment_fullname, 
-								:payment_amount, 
-								:payment_currency, 
-								:payment_test_mode,
-								:payment_merchant_type, 
-								:status, 
-								:billing_street, 
-								:billing_city, 
-								:billing_state, 
-								:billing_zipcode, 
-								:billing_country, 
-								:same_shipping_address, 
-								:shipping_street, 
-								:shipping_city, 
-								:shipping_state, 
-								:shipping_zipcode, 
-								:shipping_country)";		
-		
-		$params = array();
-		$params[':form_id'] 		  	= $payment_data['form_id'];
-		$params[':record_id'] 			= $payment_data['record_id'];
-		$params[':payment_id'] 			= 'Unite_pay';
-		$params[':date_created'] 		= $payment_data['date_created'];
-		$params[':payment_date'] 		= date("Y-m-d H:i:s");
-		$params[':payment_status'] 		= $payment_data['payment_status'];
-		$params[':payment_fullname']  	= $payment_data['payment_fullname'];
-		$params[':payment_amount'] 	  	= $money;
-		$params[':payment_currency']  	= 'CNY';
-		$params[':payment_test_mode'] 	= '';
-		$params[':payment_merchant_type'] = 'unite_pay';
-		$params[':status'] 			  	= $payment_data['status'];
-		$params[':billing_street'] 		= '';
-		$params[':billing_city']		= '';
-		$params[':billing_state'] 		= '';
-		$params[':billing_zipcode'] 	= '';
-		$params[':billing_country'] 	= '';
-		$params[':same_shipping_address'] = '';
-		$params[':shipping_street'] 	= '';
-		$params[':shipping_city'] 		= '';
-		$params[':shipping_state'] 		= '';
-		$params[':shipping_zipcode'] 	= '';
-		$params[':shipping_country'] 	= '';
-
-		mf_do_query($query,$params,$dbh);
-					
-					
-					
+								
+								/*
+								$total_payment = (double) mf_get_payment_total($dbh,$form_id,$session_id,0);
+								echo $total_payment;
+								$money = sprintf("%.2f",$total_payment);
+													
+								echo $money;
+								die;
+								
+								
+								echo $session_id;
+								echo 'aaaa';
+								echo $input_array['page_number'];
+								echo 'aaa';
+								echo $form_id;
+								$money = (double) mf_get_payment_total($dbh,$form_id,$session_id,$input_array['page_number']);
+								
+								echo $money;
+								die;
+								
+								*/
+								
+								
+								
+								
+								
+								
+									
+							}
+							
+				if(!$money){
+$query = "select 
+											A.element_id,
+											A.option_id,
+											A.`price`,
+											B.`position` 
+										from 
+											".MF_TABLE_PREFIX."element_prices A left join ".MF_TABLE_PREFIX."element_options B 
+										  on 
+											(A.form_id=B.form_id and A.element_id=B.element_id and A.option_id=B.option_id) 
+									   where 
+											A.form_id = ? 
+									order by 
+													A.element_id,B.position asc";
+									$params = array($input_array['form_id']);
+									
+									$sth = mf_do_query($query,$params,$dbh);
+									$current_price_settings = array();
+									//$money=0;
+									while($row = mf_do_fetch_result($sth)){
+										
+									//var_dump($row);
+										
+										
+										
+										$element_id = (int) $row['element_id'];
+										$option_id = (int) $row['option_id'];
+										$current_price_settings[$element_id][$option_id]  = $row['price'];
+										
+										$ky='element_'.$element_id;
+										if(isset($input_array[$ky])){
+											if($option_id==$input_array[$ky]){
+												$money=$row['price'];
+												
+											}
+											
+										}
+										if(!$money){
+											if(isset($row['price'])){
+												$money=$row['price'];
+											}
+							
+										}
+									}
+				}									
+							
+							
+							
+							
+							
+							
+							
+							
 						
-					
+			$payment_data['payment_fullname'] = 'Unite_pay';
+			$payment_data['form_id'] 		  = $input_array['form_id'];
+			$payment_data['record_id'] 		  = $submit_result['entry_id'];
+			$payment_data['date_created']	  = date("Y-m-d H:i:s");
+			$payment_data['status']			  = 0;
+			$payment_data['payment_status']   = 'unpaid'; 
 
-					$r=unite_pay($money,$form_propertiess['payment_paypal_rest_live_clientid'],$form_propertiess['payment_paypal_rest_live_secret_key'],$payment_data['record_id'].'_'.$input_array['form_id']);
-					echo $r;die;
-		
+			$query = "INSERT INTO `".MF_TABLE_PREFIX."form_payments`(
+									`form_id`, 
+									`record_id`, 
+									`payment_id`, 
+									`date_created`, 
+									`payment_date`, 
+									`payment_status`, 
+									`payment_fullname`, 
+									`payment_amount`, 
+									`payment_currency`, 
+									`payment_test_mode`,
+									`payment_merchant_type`, 
+									`status`, 
+									`billing_street`, 
+									`billing_city`, 
+									`billing_state`, 
+									`billing_zipcode`, 
+									`billing_country`, 
+									`same_shipping_address`, 
+									`shipping_street`, 
+									`shipping_city`, 
+									`shipping_state`, 
+									`shipping_zipcode`, 
+									`shipping_country`) 
+							VALUES (
+									:form_id, 
+									:record_id, 
+									:payment_id, 
+									:date_created, 
+									:payment_date, 
+									:payment_status, 
+									:payment_fullname, 
+									:payment_amount, 
+									:payment_currency, 
+									:payment_test_mode,
+									:payment_merchant_type, 
+									:status, 
+									:billing_street, 
+									:billing_city, 
+									:billing_state, 
+									:billing_zipcode, 
+									:billing_country, 
+									:same_shipping_address, 
+									:shipping_street, 
+									:shipping_city, 
+									:shipping_state, 
+									:shipping_zipcode, 
+									:shipping_country)";		
+			
+			$params = array();
+			$params[':form_id'] 		  	= $payment_data['form_id'];
+			$params[':record_id'] 			= $payment_data['record_id'];
+			$params[':payment_id'] 			= 'Unite_pay';
+			$params[':date_created'] 		= $payment_data['date_created'];
+			$params[':payment_date'] 		= date("Y-m-d H:i:s");
+			$params[':payment_status'] 		= $payment_data['payment_status'];
+			$params[':payment_fullname']  	= $payment_data['payment_fullname'];
+			$params[':payment_amount'] 	  	= $money;
+			$params[':payment_currency']  	= 'CNY';
+			$params[':payment_test_mode'] 	= '';
+			$params[':payment_merchant_type'] = 'unite_pay';
+			$params[':status'] 			  	= $payment_data['status'];
+			$params[':billing_street'] 		= '';
+			$params[':billing_city']		= '';
+			$params[':billing_state'] 		= '';
+			$params[':billing_zipcode'] 	= '';
+			$params[':billing_country'] 	= '';
+			$params[':same_shipping_address'] = '';
+			$params[':shipping_street'] 	= '';
+			$params[':shipping_city'] 		= '';
+			$params[':shipping_state'] 		= '';
+			$params[':shipping_zipcode'] 	= '';
+			$params[':shipping_country'] 	= '';
+
+			mf_do_query($query,$params,$dbh);
+						
+						
+						
+							
+						
+
+						$r=unite_pay($payment_data['form_id'],$money,$form_propertiess['payment_paypal_rest_live_clientid'],$form_propertiess['payment_paypal_rest_live_secret_key'],$payment_data['record_id'].'_'.$input_array['form_id']);
+						echo $r;die;
+			
+					}
 				}
 		
 
@@ -619,4 +784,3 @@
 	
 
 ?>
-
