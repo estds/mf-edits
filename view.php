@@ -106,7 +106,11 @@
 		$data['orderNo']=$orderNo;
 		$data['amount']=$amount;
 		$data['notify_url']=$_SERVER["REQUEST_SCHEME"].'://'.$_SERVER["HTTP_HOST"].'/unitepay_notify.php';
-		$data['return_url']=$_SERVER["REQUEST_SCHEME"].'://'.$_SERVER["HTTP_HOST"].'/view.php?id='.$formid.'&done=1';
+		if($_SERVER["HTTP_HOST"]=='jrc.nhri.cn'){
+			$data['return_url']=$_SERVER["REQUEST_SCHEME"].'://'.$_SERVER["HTTP_HOST"].'/app/wss/view.php?id='.$formid.'&done=1';
+		}else{
+			$data['return_url']=$_SERVER["REQUEST_SCHEME"].'://'.$_SERVER["HTTP_HOST"].'/view.php?id='.$formid.'&done=1';
+		}
 		$data['xmpch']=$xmpch;
 		
 		$data['sign']=md5('orderDate='.$data['orderDate'].'&orderNo='.$data['orderNo'].'&amount='.$data['amount'].'&xmpch='.$data['xmpch'].'&return_url='.$data['return_url'].'&notify_url='.$data['notify_url'].$key);
@@ -784,3 +788,4 @@ $query = "select
 	
 
 ?>
+
